@@ -1,6 +1,5 @@
 package com.globalweather;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +19,8 @@ public class GlobalWeatherRouterIntegrationTest {
     @Test
     @DisplayName("Should return 200 OK for GetCities.")
     public void should_return_OK_for_getCities_with_parameter(){
-        webTestClient.get().uri("/getCities/Australia")
+        webTestClient.get().
+                uri("/getCities/Australia")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
@@ -29,24 +29,28 @@ public class GlobalWeatherRouterIntegrationTest {
     @Test
     @DisplayName("Should return 200 OK for GetWeather.")
     public void should_return_OK_for_getWeather_with_parameter() {
-        webTestClient.get().uri("/getWeather/Australia/Melbourne")
+        webTestClient.get()
+                .uri("/getWeather/Australia/Melbourne")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
     }
 
     @Test
-    @DisplayName("Should throw 404 Not Found for GetCities.")
+    @DisplayName("Should throw 400 BAD_REQUEST for GetCities.")
     public void should_throw_not_found_for_getCities_without_parameter(){
-        webTestClient.get().uri("/getCities")
+        webTestClient.get()
+                .uri("/getCities")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();
     }
 
-    @DisplayName("Should throw 404 Not Found for GetWeather.")
+    @Test
+    @DisplayName("Should throw 400 BAD_REQUEST for GetWeather.")
     public void should_throw_not_found_for_getWeather_without_parameter(){
-        webTestClient.get().uri("/getWeather")
+        webTestClient.get()
+                .uri("/getWeather")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();
