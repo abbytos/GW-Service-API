@@ -25,7 +25,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.*;
 public class GlobalWeatherHandler {
 
     @Autowired
-    private GlobalWeatherService weatherAppService;
+    private GlobalWeatherService weatherService;
     private Pattern inputPattern = Pattern.compile("^[ A-Za-z]+$");
 
     public Mono<ServerResponse> getCitiesByCountry(ServerRequest serverRequest) {
@@ -40,7 +40,7 @@ public class GlobalWeatherHandler {
         try {
             return ok()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(weatherAppService.getCityByCountry(country), GetCityByCountryResponse.class);
+                    .body(weatherService.getCityByCountry(country), GetCityByCountryResponse.class);
         } catch (SOAPException | IOException | JAXBException e) {
             log.error("Exception occurred while making SOAP call or reading SOAP response" + e.getMessage());
 
@@ -66,7 +66,7 @@ public class GlobalWeatherHandler {
         try {
             return ok()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(weatherAppService.getWeatherOfCity(country, city), GetWeatherResponse.class);
+                    .body(weatherService.getWeatherOfCity(country, city), GetWeatherResponse.class);
         } catch (SOAPException | JAXBException | IOException e) {
             log.error("Exception occurred while making SOAP call or reading SOAP response" + e.getMessage());
 
