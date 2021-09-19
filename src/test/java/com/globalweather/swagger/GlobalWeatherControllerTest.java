@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 public class GlobalWeatherControllerTest {
 
     private final String country = "Australia";
-    private final String city = "`Melbourne`";
+    private final String city = "Melbourne";
     private final String otherCity = "Sydney";
 
     @MockBean
@@ -52,6 +52,44 @@ public class GlobalWeatherControllerTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @Test
+    @DisplayName("Should get not null for weather response")
+    public void should_get_not_Null_getWeather_response1() throws JAXBException, SOAPException, IOException {
+        GetWeatherResponse response1 = new GetWeatherResponse();
+
+        Mono<GetWeatherResponse> monoResponse = Mono.just(response1);
+
+        when(serviceMock.getWeatherOfCity("Australia", "Melbourne")).thenReturn(monoResponse);
+
+        webTestClient.get().uri("/getWeather/Australia/Melbourne")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(GetWeatherResponse.class)
+                .consumeWith(response
+                        -> Assertions.assertThat(response.getResponseBody()).isNotNull());
+    }
+
+
+    @Test
+    @DisplayName("Should not be empty for get cities response")
+    public void should_not_be_empty_getCities_response() throws JAXBException, SOAPException, IOException {
+
+        GetCityByCountryResponse response1 = new GetCityByCountryResponse();
+        GetCityByCountryResponse response2 = new GetCityByCountryResponse();
+
+        Flux<GetCityByCountryResponse> fluxResponse = Flux.just(response1, response2);
+
+        doReturn(fluxResponse).when(serviceMock).getCityByCountry(country);
+        webTestClient.get()
+                .uri("/getCities/Australia")
+                .exchange()
+                .expectBodyList(GetCityByCountryResponse.class)
+                .consumeWith(response
+                        -> Assertions.assertThat(response.getResponseBody()).isNotNull());
+    }
+
 
     @Test
     @DisplayName("Should get cities response")
@@ -125,50 +163,7 @@ public class GlobalWeatherControllerTest {
                         });
     }
 
-    @Test
-    @DisplayName("Should not be empty for get cities response")
-    public void should_not_be_empty_getCities_response() throws JAXBException, SOAPException, IOException {
-
-        GetCityByCountryResponse response1 = new GetCityByCountryResponse();
-        GetCityByCountryResponse response2 = new GetCityByCountryResponse();
-
-        Flux<GetCityByCountryResponse> fluxResponse = Flux.just(response1, response2);
-
-        doReturn(fluxResponse).when(serviceMock).getCityByCountry(country);
-        webTestClient.get()
-                .uri("/getCities/Australia")
-                .exchange()
-                .expectBodyList(GetCityByCountryResponse.class)
-                .consumeWith(result -> {
-                    List<GetCityByCountryResponse> responseBody = result.getResponseBody();
-                    Assertions.assertThat(responseBody).isNotEmpty();
-                });
-    }
 
 
-    @Test
-    @DisplayName("Should get weather response")
-    public void should_is_empty_getWeather_response1() throws JAXBException, SOAPException, IOException {
-        GetWeatherResponse response1 = new GetWeatherResponse();
-        response1.setLocation("Melbourne");
-        response1.setTime("11 AM");
-        response1.setWind("15 km per hour");
-        response1.setVisibility("10 km");
-        response1.setSkyConditions("sunny");
-        response1.setTemperature("18");
-        response1.setDewPoint("2 C");
-        response1.setRelativeHumidity("35");
-        response1.setStatus("Normal");
 
-        Mono<GetWeatherResponse> monoResponse = Mono.just(response1);
-        when(serviceMock.getWeatherOfCity(country, city)).thenReturn(monoResponse);
-
-        webTestClient.get()
-                .uri("/getWeather/Australia/Melbourne")
-                .exchange()
-                .expectBodyList(GetWeatherResponse.class)
-                .value(response -> {
-                    Assertions.assertThat(response).isNotEmpty();
-                });
-    }
 }
