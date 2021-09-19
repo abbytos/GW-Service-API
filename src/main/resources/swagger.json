@@ -1,0 +1,220 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "GlobalWeather"
+  },
+  "host": "localhost:9090",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "global-weather-controller",
+      "description": "Global Weather Controller"
+    }
+  ],
+  "paths": {
+    "/GetCitiesByCountry": {
+      "get": {
+        "tags": [
+          "GetCitiesByCountry"
+        ],
+        "summary": "GetCitiesByCountry",
+        "description": "Get all major cities by country name(full / part).",
+        "operationId": "getCitiesByCountry",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "Country",
+            "in": "query",
+            "description": "Country",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/GetCityByCountryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/GetWeather": {
+      "get": {
+        "tags": [
+          "GetWeather"
+        ],
+        "summary": "GetWeather",
+        "description": "Get weather report for all major cities around the world.",
+        "operationId": "getWeather",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "City",
+            "in": "query",
+            "description": "City",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Country",
+            "in": "query",
+            "description": "Country",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the response",
+            "schema": {
+              "$ref": "#/definitions/GetWeatherResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GetCityByCountryResponse": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "xml": {
+            "name": "City",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "country": {
+          "type": "string",
+          "xml": {
+            "name": "Country",
+            "attribute": false,
+            "wrapped": false
+          }
+        }
+      },
+      "title": "GetCityByCountryResponse",
+      "xml": {
+        "name": "Table",
+        "attribute": false,
+        "wrapped": false
+      }
+    },
+    "GetWeatherResponse": {
+      "type": "object",
+      "properties": {
+        "dewPoint": {
+          "type": "string",
+          "xml": {
+            "name": "DewPoint",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "location": {
+          "type": "string",
+          "xml": {
+            "name": "Location",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "relativeHumidity": {
+          "type": "string",
+          "xml": {
+            "name": "RelativeHumidity",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "skyConditions": {
+          "type": "string",
+          "xml": {
+            "name": "SkyConditions",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "status": {
+          "type": "string",
+          "xml": {
+            "name": "Status",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "temperature": {
+          "type": "string",
+          "xml": {
+            "name": "Temperature",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "time": {
+          "type": "string",
+          "xml": {
+            "name": "Time",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "visibility": {
+          "type": "string",
+          "xml": {
+            "name": "Visibility",
+            "attribute": false,
+            "wrapped": false
+          }
+        },
+        "wind": {
+          "type": "string",
+          "xml": {
+            "name": "Wind",
+            "attribute": false,
+            "wrapped": false
+          }
+        }
+      },
+      "title": "GetWeatherResponse",
+      "xml": {
+        "name": "NewDataSet",
+        "attribute": false,
+        "wrapped": false
+      }
+    }
+  }
+}
