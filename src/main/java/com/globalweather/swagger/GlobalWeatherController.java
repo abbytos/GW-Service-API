@@ -5,7 +5,6 @@ import com.globalweather.model.GetWeatherResponse;
 import com.globalweather.model.GetCityByCountryResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

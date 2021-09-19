@@ -7,11 +7,16 @@ import com.globalweather.router.GlobalWeatherRouter;
 import com.globalweather.service.GlobalWeatherService;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
-import org.junit.Test;
+
 import org.junit.jupiter.api.DisplayName;
+
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -26,36 +31,27 @@ import reactor.core.publisher.Mono;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {GlobalWeatherHandler.class, GlobalWeatherRouter.class})
-@WebFluxTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GlobalWeatherControllerTest {
 
     private final String country = "Australia";
-    private final String  city = "`Melbourne`";
+    private final String city = "`Melbourne`";
     private final String otherCity = "Sydney";
 
-    @Autowired
-    private ApplicationContext context;
     @MockBean
     private GlobalWeatherService serviceMock;
 
+    @Autowired
     private WebTestClient webTestClient;
-
-    @Before
-    public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
-    }
-
-    @Configuration
-    @Import(GlobalWeatherService.class)
-    static class Config {
-    }
 
     @Test
     @DisplayName("Should get cities response")
@@ -81,10 +77,9 @@ public class GlobalWeatherControllerTest {
                 .expectBodyList(GetCityByCountryResponse.class)
                 .value(response ->
                         {
-                            Assertions.assertThat(response.get(0).getCountry().equalsIgnoreCase(country));
-                            Assertions.assertThat(response.get(0).getCity().equalsIgnoreCase(city));
-                            Assertions.assertThat(response.get(0).getCountry().equalsIgnoreCase(country));
-                            Assertions.assertThat(response.get(0).getCity().equalsIgnoreCase(otherCity));
+                            Assertions.assertThat(response).isNotEmpty();
+                            Assertions.assertThat(response.get(0).getCountry()).isEqualTo(country);
+                            Assertions.assertThat(response.get(0).getCity()).isEqualTo(otherCity);
                         }
                 );
     }
@@ -107,25 +102,32 @@ public class GlobalWeatherControllerTest {
 
         Mono<GetWeatherResponse> monoResponse = Mono.just(response1);
 
-        when(serviceMock.getWeatherOfCity(country, city)).thenReturn(monoResponse);
+        when(serviceMock.getWeatherOfCity("Australia", "Melbourne")).thenReturn(monoResponse);
 
-        webTestClient.get()
-                .uri("/getWeather/Australia/Melbourne")
+        webTestClient.get().uri("/getWeather/Australia/Melbourne")
                 .accept(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus()
+                .isOk()
                 .expectBodyList(GetWeatherResponse.class)
                 .value(response ->
-                        {
-                            Assertions.assertThat(response.get(0).getLocation().equalsIgnoreCase(city));
-                            Assertions.assertThat(response.get(0).getTime().equalsIgnoreCase("11 AM"));
-                        }
-                );
+                       {
+                           Assertions.assertThat(response).isNotEmpty();
+                           Assertions.assertThat(response.get(0).getLocation()).isEqualTo("Melbourne");
+                           Assertions.assertThat(response.get(0).getTime()).isEqualTo("11 AM");
+                           Assertions.assertThat(response.get(0).getWind()).isEqualTo("15 km per hour");
+                           Assertions.assertThat(response.get(0).getVisibility()).isEqualTo("10 km");
+                           Assertions.assertThat(response.get(0).getSkyConditions()).isEqualTo("sunny");
+                           Assertions.assertThat(response.get(0).getTemperature()).isEqualTo("18");
+                           Assertions.assertThat(response.get(0).getDewPoint()).isEqualTo("2 C");
+                           Assertions.assertThat(response.get(0).getRelativeHumidity()).isEqualTo("35");
+                           Assertions.assertThat(response.get(0).getStatus()).isEqualTo("Normal");
+                        });
     }
 
     @Test
-    @DisplayName("Should get weather response")
-    public void should_not_be_empty_getWeather_response() throws JAXBException, SOAPException, IOException {
+    @DisplayName("Should not be empty for get cities response")
+    public void should_not_be_empty_getCities_response() throws JAXBException, SOAPException, IOException {
 
         GetCityByCountryResponse response1 = new GetCityByCountryResponse();
         GetCityByCountryResponse response2 = new GetCityByCountryResponse();
@@ -142,23 +144,31 @@ public class GlobalWeatherControllerTest {
                     Assertions.assertThat(responseBody).isNotEmpty();
                 });
     }
+
+
     @Test
     @DisplayName("Should get weather response")
-    public void should_is_empty_getWeather_response() throws JAXBException, SOAPException, IOException {
+    public void should_is_empty_getWeather_response1() throws JAXBException, SOAPException, IOException {
+        GetWeatherResponse response1 = new GetWeatherResponse();
+        response1.setLocation("Melbourne");
+        response1.setTime("11 AM");
+        response1.setWind("15 km per hour");
+        response1.setVisibility("10 km");
+        response1.setSkyConditions("sunny");
+        response1.setTemperature("18");
+        response1.setDewPoint("2 C");
+        response1.setRelativeHumidity("35");
+        response1.setStatus("Normal");
 
-        GetCityByCountryResponse response1 = new GetCityByCountryResponse();
-        GetCityByCountryResponse response2 = new GetCityByCountryResponse();
+        Mono<GetWeatherResponse> monoResponse = Mono.just(response1);
+        when(serviceMock.getWeatherOfCity(country, city)).thenReturn(monoResponse);
 
-        Flux<GetCityByCountryResponse> fluxResponse = Flux.just(response1, response2);
-
-        doReturn(fluxResponse).when(serviceMock).getCityByCountry(country);
         webTestClient.get()
-                .uri("/getCities/Norway")
+                .uri("/getWeather/Australia/Melbourne")
                 .exchange()
-                .expectBodyList(GetCityByCountryResponse.class)
-                .consumeWith(result -> {
-                    List<GetCityByCountryResponse> responseBody = result.getResponseBody();
-                    Assertions.assertThat(responseBody).isNotEmpty();
+                .expectBodyList(GetWeatherResponse.class)
+                .value(response -> {
+                    Assertions.assertThat(response).isNotEmpty();
                 });
     }
 }
